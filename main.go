@@ -13,8 +13,10 @@ import (
 	"gonum.org/v1/gonum/stat"
 )
 
-const giveUp = 200
-const targetTrials = 1 << 20
+const (
+	giveUp       = 200
+	targetTrials = 1 << 20
+)
 
 type popItem struct {
 	ix  int
@@ -55,7 +57,7 @@ func newTrialSummary(
 ) *trialSummary {
 	turnMean, turnStdev := stat.MeanStdDev(counts, turnWeights)
 	capMean, capStdev := stat.MeanStdDev(counts, capWeights)
-	safePop := make([]popItem, len(popularity), len(popularity))
+	safePop := make([]popItem, len(popularity))
 	copy(safePop, popularity)
 	// reverse-sort
 	sort.Slice(safePop, func(i int, j int) bool {
@@ -110,7 +112,7 @@ func (p *Player) Reset() {
 }
 
 func makeCounts(cnt int) []float64 {
-	ret := make([]float64, cnt, cnt)
+	ret := make([]float64, cnt)
 	for i := 0; i < cnt; i++ {
 		ret[i] = float64(i)
 	}
@@ -131,9 +133,9 @@ func main() {
 		var totalTurns int
 		minTurns := giveUp + 1
 		maxTurns := 0
-		turnWeights := make([]float64, giveUp+1, giveUp+1)
-		capWeights := make([]float64, giveUp+1, giveUp+1)
-		popularity := make([]popItem, len(nellyboard), len(nellyboard))
+		turnWeights := make([]float64, giveUp+1)
+		capWeights := make([]float64, giveUp+1)
+		popularity := make([]popItem, len(nellyboard))
 		for i := 0; i < len(popularity); i++ {
 			popularity[i] = popItem{ix: i}
 		}
@@ -148,7 +150,7 @@ func main() {
 				defer wg.Done()
 
 				dieSix := die.New(6)
-				players := make([]*Player, playerCnt, playerCnt)
+				players := make([]*Player, playerCnt)
 				for i := 0; i < playerCnt; i++ {
 					players[i] = &Player{}
 				}
@@ -157,10 +159,10 @@ func main() {
 				localTurns := 0
 				localMinTurns := giveUp + 1
 				localMaxTurns := 0
-				localTurnWeights := make([]float64, giveUp+1, giveUp+1)
-				localCapWeights := make([]float64, giveUp+1, giveUp+1)
-				localPopularity := make([]int, len(nellyboard), len(nellyboard))
-				for _ = range chTrials {
+				localTurnWeights := make([]float64, giveUp+1)
+				localCapWeights := make([]float64, giveUp+1)
+				localPopularity := make([]int, len(nellyboard))
+				for range chTrials {
 					for i := 0; i < playerCnt; i++ {
 						players[i].Reset()
 					}
